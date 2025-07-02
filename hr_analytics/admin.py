@@ -26,11 +26,11 @@ class EmployeeAdmin(admin.ModelAdmin):
 
         average_promotions = Employee.objects.aggregate(Avg('promotion_count'))['promotion_count__avg'] or 0
         gender_count = Employee.objects.values('gender').annotate(count=Count('gender'))
-        # Calculate average tenure manually
+     
         tenures = [emp.tenure() for emp in Employee.objects.all()]
         average_tenure = sum(tenures) / len(tenures) if tenures else 0
 
-        # 🔥 NEW: Add salary-by-department data
+       
         salary_by_dept = (
         Employee.objects.values("department__name")
         .annotate(total_salary=Sum("salary"))
