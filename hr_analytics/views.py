@@ -3,16 +3,7 @@ from .models import Employee
 from sklearn.linear_model import LinearRegression
 
 def predict_salary(request, department_name, experience_years):
-    try:
-        exp = float(experience_years)
-    except ValueError:
-        return JsonResponse({"error": "Invalid experience value."}, status=400)
-
-    employees = Employee.objects.filter(
-        department__name=department_name,
-        resignation_date__isnull=True
-    )
-
+    
     X = []
     y = []
     employee_list = []
