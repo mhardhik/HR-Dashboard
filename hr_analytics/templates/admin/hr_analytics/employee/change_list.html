@@ -1,0 +1,92 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Include Chart.js from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<h1>HR Analytics Summary</h1>
+
+<ul>
+    <li><b>Total Employees:</b> {{ total_employees }}</li>
+    <li><b>Average Salary:</b> ₹{{ average_salary|floatformat:2 }}</li>
+    <li><b>Total Salary:</b> ₹{{ total_salary|floatformat:2 }}</li>
+    <li><b>Average Performance:</b> {{ average_performance|floatformat:2 }}</li>
+    <li><b>Turnover Rate:</b> {{ turnover_rate|floatformat:2 }}%</li>
+    <li><b>Average Promotions:</b> {{ average_promotions|floatformat:2 }}</li>
+    <li><b>Average Tenure:</b> {{ average_tenure|floatformat:2 }} years</li>
+</ul>
+
+<h3>Gender Distribution (Chart)</h3>
+
+
+<canvas id="genderChart" class="chart-small"></canvas>
+
+<canvas id="genderChart" style="width: 150px; height: 150px;"></canvas>
+
+
+<!-- Fix: Render script tag using json_script -->
+{{ gender_count|json_script:"gender-data" }}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('genderChart').getContext('2d');
+        const genderData = JSON.parse(document.getElementById('gender-data').textContent);
+
+        const data = {
+            labels: genderData.map(item => item.gender),
+            datasets: [{
+                data: genderData.map(item => item.count),
+                backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56'],
+            }]
+        };
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: data,
+        });
+    });
+</script>
+
+<h3>Salary by Department</h3>
+<canvas id="salaryChart" width="400" height="200"></canvas>
+
+{{ salary_by_dept|json_script:"salary-chart-data" }}
+
+<script>
+    const salaryData = JSON.parse(document.getElementById("salary-chart-data").textContent);
+    const ctx = document.getElementById("salaryChart").getContext("2d");
+
+    const labels = salaryData.map(item => item["department__name"]);
+    const data = salaryData.map(item => item["total_salary"]);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Total Salary (₹)',
+                data: data,
+                backgroundColor: '#4e73df',
+                borderColor: '#2e59d9',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: value => '₹' + value.toLocaleString()
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+
+
+{{ block.super }}
+{% endblock %}
